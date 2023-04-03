@@ -1,10 +1,10 @@
-category: Authentication
+category: Analytics & SIEM
 commonfields:
   id: SpyCloud
   version: -1
 configuration:
-- defaultvalue: https://api.spycloud.io/enterprise-v2/breach/
-  display: Base Url
+- defaultvalue: https://api.spycloud.io/enterprise-v2/
+  display: API URL
   name: url
   required: true
   type: 0
@@ -21,8 +21,9 @@ configuration:
   name: proxy
   required: false
   type: 8
-description: With the SpyCloud integration data from breaches can be pulled and further
-  processed in Playbooks. Filtering parameters can be used to filter the data set.
+description: Use SpyCloud Integration to interactively lookup Breaches list, Breaches
+  list by domain, Breaches list by Username, Breaches list by Email, Breaches list
+  by IP either as playbook tasks or in the War Room.
 display: SpyCloud
 name: SpyCloud
 script:
@@ -35,12 +36,850 @@ script:
       name: limit
       required: false
       secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field. Example:-  YYYY-MM-DD
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date range query on the spycloud_publish_date field.
+         Example:-  YYYY-MM-DD
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - default: false
+      description: Query value to search the breach catalog for.
+      isArray: false
+      name: query
+      required: false
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fetch all results.
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
     deprecated: false
     description: Lists the breaches identified. By default, this lists all breaches
       known in SpyCloud. With the arguments, it's possible to scope the results on
       date and keywords.
     execution: false
-    name: get-breaches-list
+    name: spycloud-breach-list
+  - arguments:
+    - default: false
+      description: Numerical ID of the breach. Both integer and UUIDv4 ID formats
+        are supported. You may also use a comma delimiter to request more than one
+        breach at a time.
+      isArray: false
+      name: id
+      required: true
+      secret: false
+    deprecated: false
+    description: Retrieve Breach Catalog Information by ID.
+    execution: false
+    name: spycloud-breach-data-by-id
+  - arguments:
+    - default: true
+      description: Domain or Subdomain name to search for.
+      isArray: false
+      name: domain
+      required: true
+      secret: false
+    - default: false
+      description: The maximum number of records to return from the collection. Limit
+        default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: false
+      description: This parameter lets you filter results by several types. The allowed
+        values are 'corporate' for corporate records, and 'infected' for infected
+        user records, email_domain to just match against email domains, and target_domain
+        to just match against target domains or subdomains. If no value has been provided
+        the API function will, by default, return all record types.
+      isArray: false
+      name: type
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field. Example:-  YYYY-MM-DD
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date range query on the spycloud_publish_date field.
+         Example:-  YYYY-MM-DD
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to filter based on the numeric severity code.
+        Possible values are:
+        2 -> Email only severity. This record is part of an email-only list.
+        5 -> Informational severity. This severity value is given to breach records where we have a non-crackable password hash, or no password at all.
+        20 ->High severity. This severity value is given to breach records where we have an email address and a plaintext password.
+        25 -> Critical severity. This severity value is given to breach records recovered from an infected machine (botnet data). These records will always have a plaintext password and most will have an email address.
+      isArray: false
+      name: severity
+      predefined:
+      - ''
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fetch all results.
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
+    deprecated: false
+    description: Get Breach Data by Domain Search
+    execution: false
+    name: spycloud-breach-data-by-domain
+  - arguments:
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: since_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date range
+         query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: until_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to filter based on the numeric severity code.
+        Possible values are:
+        2 -> Email only severity. This record is part of an email-only list.
+        5 -> Informational severity. This severity value is given to breach records where we have a non-crackable password hash, or no password at all.
+        20 ->High severity. This severity value is given to breach records where we have an email address and a plaintext password.
+        25 -> Critical severity. This severity value is given to breach records recovered from an infected machine (botnet data). These records will always have a plaintext password and most will have an email address.
+      isArray: false
+      name: severity
+      predefined:
+      - ''
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - default: false
+      description: The maximum number of records to return from the collection. Limit
+        default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: true
+      description: Username you wish to search for.
+      isArray: false
+      name: username
+      required: true
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fetch all results.
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
+    deprecated: false
+    description: Get Breach Data by Username Search.
+    execution: false
+    name: spycloud-breach-data-by-username
+  - arguments:
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: since_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date range
+         query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: until_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to filter based on the numeric severity code.
+        Possible values are:
+        2 -> Email only severity. This record is part of an email-only list.
+        5 -> Informational severity. This severity value is given to breach records where we have a non-crackable password hash, or no password at all.
+        20 ->High severity. This severity value is given to breach records where we have an email address and a plaintext password.
+        25 -> Critical severity. This severity value is given to breach records recovered from an infected machine (botnet data). These records will always have a plaintext password and most will have an email address.
+      isArray: false
+      name: severity
+      predefined:
+      - ''
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - default: false
+      description: The maximum number of records to return from the collection. Limit
+        default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: true
+      description: IP address or network CIDR notation to search for. For CIDR notation,
+        use an underscore instead of a slash.
+      isArray: false
+      name: ip
+      required: true
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fecth all results.
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
+    deprecated: false
+    description: Get Breach Data by IP Address Search
+    execution: false
+    name: spycloud-breach-data-by-ip-address
+  - arguments:
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: since_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date range
+         query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: until_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to filter based on the numeric severity code.
+        Possible values are:
+        2 -> Email only severity. This record is part of an email-only list.
+        5 -> Informational severity. This severity value is given to breach records where we have a non-crackable password hash, or no password at all.
+        20 ->High severity. This severity value is given to breach records where we have an email address and a plaintext password.
+        25 -> Critical severity. This severity value is given to breach records recovered from an infected machine (botnet data). These records will always have a plaintext password and most will have an email address.
+      isArray: false
+      name: severity
+      predefined:
+      - ''
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - default: false
+      description: The maximum number of records to return from the collection. Limit
+        default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: true
+      description: Email address to search for.
+      isArray: false
+      name: email
+      required: true
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fetch all results.
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
+    deprecated: false
+    description: Get Breach Data by Email Search.
+    execution: false
+    name: spycloud-breach-data-by-email-address
+  - arguments:
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: since_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date range
+         query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: until_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to filter based on the numeric severity code.
+        Possible values are:
+        2 -> Email only severity. This record is part of an email-only list.
+        5 -> Informational severity. This severity value is given to breach records where we have a non-crackable password hash, or no password at all.
+        20 ->High severity. This severity value is given to breach records where we have an email address and a plaintext password.
+        25 -> Critical severity. This severity value is given to breach records recovered from an infected machine (botnet data). These records will always have a plaintext password and most will have an email address.
+      isArray: false
+      name: severity
+      predefined:
+      - ''
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - default: false
+      description: The maximum number of records to return from the collection. Limit
+        default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: true
+      description: Password you wish to search for.
+      isArray: false
+      name: password
+      required: true
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fetch all results.
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
+    deprecated: false
+    description: Get Breach Data by Password Search.
+    execution: false
+    name: spycloud-breach-data-by-password
+  - arguments:
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: since_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date range
+         query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: until_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to filter based on the numeric severity code.
+        Possible values are:
+        2 -> Email only severity. This record is part of an email-only list.
+        5 -> Informational severity. This severity value is given to breach records where we have a non-crackable password hash, or no password at all.
+        20 ->High severity. This severity value is given to breach records where we have an email address and a plaintext password.
+        25 -> Critical severity. This severity value is given to breach records recovered from an infected machine (botnet data). These records will always have a plaintext password and most will have an email address.
+      isArray: false
+      name: severity
+      predefined:
+      - ''
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - default: false
+      description: The maximum number of records to return from the collection. Limit
+        default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - auto: PREDEFINED
+      default: true
+      description: This parameter lets you filter results by type. The allowed values
+        are 'corporate' for corporate records, and 'infected' for infected user records
+        (from botnet data). If no value has been provided the API function will, by
+        default, return all record types.
+      isArray: false
+      name: type
+      predefined:
+      - corporate
+      - infected
+      required: false
+      secret: false
+    - auto: PREDEFINED
+      default: true
+      description: This parameters lets you filter results for only emails or only
+        domains on your watchlist. If no value has been provided, the API will return
+        all watchlist types.
+      isArray: false
+      name: watchlist_type
+      predefined:
+      - email
+      - domain
+      - subdomain
+      - ip
+      required: false
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fetch all results.
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
+    deprecated: false
+    description: Get Breach Data by Password Search.
+    execution: false
+    name: spycloud-watchlist-data
+  - arguments:
+    - default: false
+      description: One or more comma delimited Infected Machine ID to search for compass
+        breach records.
+      isArray: false
+      name: infected_machine_id
+      required: true
+      secret: false
+    - default: false
+      description: The maximum number of records to return from the collection. Limit
+        default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    deprecated: false
+    description: Get compass device data by infected_machine_id.
+    execution: false
+    name: spycloud-compass-device-data
+  - arguments:
+    - default: false
+      description: |-
+        This parameter allows you to define the starting point for a date
+                range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date
+                range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the infected_time field.
+      isArray: false
+      name: since_infected
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the infected_time field.
+      isArray: false
+      name: until_infected
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        The maximum number of records to return from the collection. Limit
+                default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: false
+      description: This parameter will return records that are verified or unverified,
+        meaning those that matched the watchlist or not. By default if type is not
+        used, both types will be returned.
+      isArray: false
+      name: type
+      required: false
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fetch all results
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
+    deprecated: false
+    description: Compass data list.
+    execution: false
+    name: spycloud-compass-data-list
+  - arguments:
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the infected_time.
+      isArray: false
+      name: since_infected
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the infected_time field.
+      isArray: false
+      name: until_infected
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        The maximum number of records to return from the collection. Limit
+                default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    deprecated: false
+    description: Compass device list data.
+    execution: false
+    name: spycloud-compass-device-list
+  - arguments:
+    - default: false
+      description: One or more comma delimited Compass target application (subdomain
+        or domain) to search for.
+      isArray: false
+      name: target_application
+      required: true
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        The maximum number of records to return from the collection. Limit
+                default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    deprecated: false
+    description: Get compass application data.
+    execution: false
+    name: spycloud-compass-application-data
   dockerimage: demisto/python3:3.7.4.2245
   feed: false
   isfetch: false
