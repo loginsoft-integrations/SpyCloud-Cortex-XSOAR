@@ -1,13 +1,15 @@
-import demistomock as demisto
 from math import floor, ceil
-from CommonServerPython import *
 from typing import Dict, List, Optional, Any, Tuple
 from dateparser import parse
 import requests
-import urllib3
+from urllib3 import disable_warnings
+from CommonServerPython import * # noqa: F401 # pylint: disable=unused-wildcard-import
+
 
 # Disable insecure warnings
-urllib3.disable_warnings()  # pylint: disable=no-member
+disable_warnings()  # pylint: disable=no-member
+
+''' CONSTANT '''
 
 INTEGRATION_CONTEXT_NAME = 'SpyCloud'
 INVALID_CREDENTIALS_ERROR_MSG = 'Authorization Error: The provided API Key ' \
@@ -62,9 +64,9 @@ class Client(BaseClient):
         Args:
             end_point (str): SpyCloud endpoint.
             params (dict): Params.
-            is_retry (bool): Boolean Variable to check weather retry required.
+            is_retry (bool): Boolean Variable to check whether retry required.
         Returns:
-            Return the raw api response from Cisco Umbrella Reporting API.
+            Return the raw api response from SpyCLoud API.
         """
         response: Dict = {}
         if params is None:
@@ -102,23 +104,22 @@ class Client(BaseClient):
         err_msg = response.json().get('message') or response.json().get(
             'errorMessage')
         if response.status_code == 429:
-            if TOO_MANY_REQUESTS in response_headers.get(X_AMAZON_ERROR_TYPE,
-                                                         ''):
+            if TOO_MANY_REQUESTS in response_headers.get(X_AMAZON_ERROR_TYPE, ''):
                 self.query_spy_cloud_api(response.url, is_retry=True)
             elif LIMIT_EXCEED in response_headers.get(X_AMAZON_ERROR_TYPE, ''):
-                raise DemistoException(MONTHLY_QUOTA_EXCEED_MSG)
+                raise DemistoException(MONTHLY_QUOTA_EXCEED_MSG, res=response)
         elif response.status_code == 403:
             if INVALID_IP in response_headers.get(SPYCLOUD_ERROR, ''):
                 raise DemistoException(
                     f'{response_headers.get(SPYCLOUD_ERROR, "")}. '
-                    f'{INVALID_IP_MSG}')
+                    f'{INVALID_IP_MSG}', res=response)
             elif INVALID_API_KEY in response_headers.get(SPYCLOUD_ERROR, ''):
-                raise DemistoException(INVALID_CREDENTIALS_ERROR_MSG)
+                raise DemistoException(INVALID_CREDENTIALS_ERROR_MSG, res=response)
         else:
             raise DemistoException(err_msg)
 
-    ''' HELPER FUNCTIONS '''
 
+''' HELPER FUNCTIONS '''
 
 def pagination(page: Optional[int], page_size: Optional[int],
                limit: Optional[int]):
@@ -162,7 +163,7 @@ def test_module(client: Client) -> str:
     Returns:
         Connection ok
     """
-    client.query_spy_cloud_api("breach/data/domains/loginsoft.com", {})
+    client.query_spy_cloud_api("breach/data/watchlist", {})
 
     return "ok"
 
@@ -199,14 +200,14 @@ def breaches_lookup_to_markdown(response: List[Dict], title: str):
     """
     Parsing the SpyCloud data
     Args:
-        response (list): Cisco Umbrella Reporting data
+        response (list): SpyCloud response data
         title (str): Title string
     Returns:
         A string representation of the markdown table
     """
     record_list = []
     for data in response:
-        new = {
+        new_record = {
             'Title': data.get('title'),
             'SpyCloud Publish Date': data.get('spycloud_publish_date'),
             'Description': data.get('description'),
@@ -216,7 +217,7 @@ def breaches_lookup_to_markdown(response: List[Dict], title: str):
             'UUID': data.get('uuid'),
             'Type': data.get('type')
         }
-        record_list.append(new)
+        record_list.append(new_record)
     headers = record_list[0] if record_list else {}
     headers = list(headers.keys())
     markdown = tableToMarkdown(title, record_list, headers=headers,
@@ -228,14 +229,14 @@ def lookup_to_markdown_table(response: List[Dict], title: str):
     """
     Parsing the SpyCloud data
     Args:
-        response (list): Cisco Umbrella Reporting data
+        response (list): SpyCloud response data
         title (str): Title string
     Returns:
         A string representation of the markdown table
     """
     record_list = []
     for data in response:
-        new = {
+        new_record = {
             'Source ID': data.get('source_id'),
             'Email': data.get('email'),
             'Full Name': data.get('full_name'),
@@ -266,7 +267,7 @@ def lookup_to_markdown_table(response: List[Dict], title: str):
             'Severity': data.get('severity'),
             'Sighting': data.get('sighting')
         }
-        record_list.append(new)
+        record_list.append(new_record)
     headers = record_list[0] if record_list else {}
     headers = list(headers.keys())
     markdown = tableToMarkdown(title, record_list, headers=headers,
@@ -355,7 +356,7 @@ def get_command_title_string(sub_context: str, page: Optional[int],
     return f"{sub_context}"
 
 
-def get_breaches_list_command(client: Client, args: Dict[str, Any]):
+def breaches_list_command(client: Client, args: Dict[str, Any]):
     """
     List of breach data.
     Args:
@@ -379,7 +380,7 @@ def get_breaches_list_command(client: Client, args: Dict[str, Any]):
     )
 
 
-def get_breache_data_by_id_command(client: Client, args: Dict[str, Any]):
+def get_breach_data_by_id_command(client: Client, args: Dict[str, Any]):
     """
     Breach data by id.
     Args:
@@ -399,7 +400,7 @@ def get_breache_data_by_id_command(client: Client, args: Dict[str, Any]):
 
     return CommandResults(
         readable_output=readable_output,
-        outputs_prefix=f'{INTEGRATION_CONTEXT_NAME}.BreachDataByID',
+        outputs_prefix=f'{INTEGRATION_CONTEXT_NAME}.BreachData',
         outputs_key_field='id',
         outputs=response
     )
@@ -425,7 +426,7 @@ def get_breach_data_by_domain_command(client: Client, args: Dict[str, Any]):
 
     return CommandResults(
         readable_output=readable_output,
-        outputs_prefix=f'{INTEGRATION_CONTEXT_NAME}.DomainBreachData',
+        outputs_prefix=f'{INTEGRATION_CONTEXT_NAME}.Domain',
         outputs_key_field='document_id',
         outputs=paginated_results
     )
@@ -451,7 +452,7 @@ def get_breach_data_by_username_command(client: Client, args: Dict[str, Any]):
 
     return CommandResults(
         readable_output=readable_output,
-        outputs_prefix=f'{INTEGRATION_CONTEXT_NAME}.UsernameBreachData',
+        outputs_prefix=f'{INTEGRATION_CONTEXT_NAME}.Username',
         outputs_key_field='document_id',
         outputs=paginated_results
     )
@@ -477,7 +478,7 @@ def get_breach_data_by_ip_address_command(client: Client, args: Dict[str, Any]):
 
     return CommandResults(
         readable_output=readable_output,
-        outputs_prefix=f'{INTEGRATION_CONTEXT_NAME}.IPAddressBreachData',
+        outputs_prefix=f'{INTEGRATION_CONTEXT_NAME}.IPAddress',
         outputs_key_field='document_id',
         outputs=paginated_results
     )
@@ -504,7 +505,7 @@ def get_breach_data_by_email_address_command(client: Client,
 
     return CommandResults(
         readable_output=readable_output,
-        outputs_prefix=f'{INTEGRATION_CONTEXT_NAME}.EmailAddressBreachData',
+        outputs_prefix=f'{INTEGRATION_CONTEXT_NAME}.EmailAddress',
         outputs_key_field='document_id',
         outputs=paginated_results
     )
@@ -522,7 +523,7 @@ def get_breach_data_by_passwords_command(client: Client, args: Dict[str, Any]):
             result.
     """
     passwords = args.get('password')
-    title_string = f'breach/data/passwords/{passwords}'
+    title_string = f'Breach List for Password {passwords}'
     endpoint = f'breach/data/passwords/{passwords}'
     paginated_results, title = command_helper_function(client, endpoint, args,
                                                        title_string)
@@ -530,7 +531,7 @@ def get_breach_data_by_passwords_command(client: Client, args: Dict[str, Any]):
 
     return CommandResults(
         readable_output=readable_output,
-        outputs_prefix=f'{INTEGRATION_CONTEXT_NAME}.PasswordBreachData',
+        outputs_prefix=f'{INTEGRATION_CONTEXT_NAME}.Password',
         outputs_key_field='document_id',
         outputs=paginated_results
     )
@@ -555,7 +556,7 @@ def get_watchlist_data_command(client: Client, args: Dict[str, Any]):
 
     return CommandResults(
         readable_output=readable_output,
-        outputs_prefix=f'{INTEGRATION_CONTEXT_NAME}.WatchlistData',
+        outputs_prefix=f'{INTEGRATION_CONTEXT_NAME}.Watchlist',
         outputs_key_field='document_id',
         outputs=paginated_results
     )
@@ -623,17 +624,8 @@ def compass_device_list_command(client: Client, args: Dict[str, Any]):
     """
     endpoint = 'compass/devices'
     title_string = 'Compass Device List'
-    spycloud_args = create_spycloud_args(args)
-    page = arg_to_number(args.get("page"), arg_name="page")
-    page_size = arg_to_number(args.get("page_size"), arg_name="page_size")
-    limit = arg_to_number(args.get('limit', DEFAULT_PAGE_SIZE),
-                          arg_name='limit')
-    response = client.query_spy_cloud_api(endpoint, spycloud_args)
-    results = response.get('results', [])
-    total_record = response.get('hits', 0)
-    title = get_command_title_string(title_string, page, page_size, total_record)
-    updated_limit, offset = pagination(page, page_size, limit)
-    paginated_results = get_paginated_results(results, offset, updated_limit)
+    paginated_results, title = command_helper_function(client, endpoint,
+                                                       args, title_string)
     readable_output = lookup_to_markdown_table(paginated_results, title)
     return CommandResults(
         readable_output=readable_output,
@@ -656,17 +648,9 @@ def get_compass_application_data_command(client: Client, args: Dict[str, Any]):
     """
     target_application = args.get('target_application')
     endpoint = f'compass/data/applications/{target_application}'
-    spycloud_args = create_spycloud_args(args)
-    page = arg_to_number(args.get("page"), arg_name="page")
-    page_size = arg_to_number(args.get("page_size"), arg_name="page_size")
-    limit = arg_to_number(args.get('limit', DEFAULT_PAGE_SIZE),
-                          arg_name='limit')
-    response = client.query_spy_cloud_api(endpoint, spycloud_args)
-    results = response.get('results', [])
-    total_record = response.get('hits', 0)
-    title = get_command_title_string('Compass Applications - Data', page, page_size, total_record)
-    updated_limit, offset = pagination(page, page_size, limit)
-    paginated_results = get_paginated_results(results, offset, updated_limit)
+    title_string = 'Compass Applications - Data'
+    paginated_results, title = command_helper_function(client, endpoint,
+                                                       args, title_string)
     readable_output = lookup_to_markdown_table(paginated_results, title)
     return CommandResults(
         readable_output=readable_output,
@@ -685,6 +669,7 @@ def main():
     args = demisto.args()
     verify_certificate = not params.get('insecure', False)
     proxy = params.get('proxy', False)
+    handle_proxy()
     command = demisto.command()
     try:
         base_url = params.get('url')
@@ -693,19 +678,19 @@ def main():
             apikey,
             verify=verify_certificate,
             proxy=proxy)
-        LOG(f'Command being called is {command}')
+        demisto.info(f'Command being called is {command}')
         commands = {
-            'spycloud-breach-list':
-                get_breaches_list_command,
-            'spycloud-breach-data-by-id': get_breache_data_by_id_command,
-            'spycloud-breach-data-by-domain': get_breach_data_by_domain_command,
-            'spycloud-breach-data-by-username':
+            'spycloud-list-breaches':
+                breaches_list_command,
+            'spycloud-get-breach-data': get_breach_data_by_id_command,
+            'spycloud-domain-data': get_breach_data_by_domain_command,
+            'spycloud-username-data':
                 get_breach_data_by_username_command,
-            'spycloud-breach-data-by-ip-address':
+            'spycloud-ip-address-data':
                 get_breach_data_by_ip_address_command,
-            'spycloud-breach-data-by-email-address':
+            'spycloud-email-data':
                 get_breach_data_by_email_address_command,
-            'spycloud-breach-data-by-password':
+            'spycloud-password-data':
                 get_breach_data_by_passwords_command,
             'spycloud-watchlist-data': get_watchlist_data_command,
             'spycloud-compass-device-data': get_compass_device_data_command,
@@ -718,7 +703,7 @@ def main():
         elif command in commands:
             return_results(commands[command](client, args))
         else:
-            raise NotImplementedError
+            raise NotImplementedError(f"command {command} is not supported")
     except Exception as e:
         return_error(
             f'Failed to execute {command} command. Error: {str(e)}')
