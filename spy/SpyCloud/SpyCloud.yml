@@ -1,0 +1,1809 @@
+category: Analytics & SIEM
+commonfields:
+  id: SpyCloud
+  version: -1
+configuration:
+- defaultvalue: https://api.spycloud.io/enterprise-v2/
+  display: API URL
+  name: url
+  required: true
+  type: 0
+- display: API Key
+  hidden: false
+  name: apikey
+  required: true
+  type: 4
+- display: Trust any certificate (not secure)
+  name: insecure
+  required: false
+  type: 8
+- display: Use system proxy settings
+  name: proxy
+  required: false
+  type: 8
+description: Use SpyCloud Integration to interactively lookup Breaches list, Breaches
+  list by domain, Breaches list by Username, Breaches list by Email, Breaches list
+  by IP either as playbook tasks or in the War Room.
+display: SpyCloud
+name: SpyCloud
+script:
+  commands:
+  - arguments:
+    - default: false
+      description: The maximum number of records to return from the collection. Limit
+        default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field. Example:-  YYYY-MM-DD
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date range query on the spycloud_publish_date field.
+         Example:-  YYYY-MM-DD
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - default: false
+      description: Query value to search the breach catalog for.
+      isArray: false
+      name: query
+      required: false
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fetch all results.
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
+    deprecated: false
+    description: Lists the breaches identified. By default, this lists all breaches
+      known in SpyCloud. With the arguments, it's possible to scope the results on
+      date and keywords.
+    execution: false
+    name: spycloud-list-breaches
+    outputs:
+    - contextPath: SpyCloud.BreachList.site
+      description: ''
+      type: String
+    - contextPath: SpyCloud.BreachList.confidence
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.id
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.acquisition_date
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.BreachList.uuid
+      description: ''
+      type: String
+    - contextPath: SpyCloud.BreachList.num_records
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.type
+      description: ''
+      type: String
+    - contextPath: SpyCloud.BreachList.title
+      description: ''
+      type: String
+    - contextPath: SpyCloud.BreachList.spycloud_publish_date
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.BreachList.description
+      description: ''
+      type: String
+    - contextPath: SpyCloud.BreachList.site_description
+      description: ''
+      type: String
+    - contextPath: SpyCloud.BreachList.assets.phone
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.gender
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.company_name
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.user_agent
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.country
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.social_telegram
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.social_skype
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.state
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.account_login_time
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.ip_addresses
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.postal_code
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.dob
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.account_signup_time
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.homepage
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.first_name
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.country_code
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.account_modification_time
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.full_name
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.address_1
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.last_name
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.email
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.city
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.password
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachList.assets.username
+      description: ''
+      type: Number
+  - arguments:
+    - default: false
+      description: Numerical ID of the breach. Both integer and UUIDv4 ID formats
+        are supported. You may also use a comma delimiter to request more than one
+        breach at a time.
+      isArray: false
+      name: id
+      required: true
+      secret: false
+    deprecated: false
+    description: Retrieve Breach Catalog Information by ID.
+    execution: false
+    name: spycloud-get-breach-data
+    outputs:
+    - contextPath: SpyCloud.BreachData.site
+      description: ''
+      type: String
+    - contextPath: SpyCloud.BreachData.confidence
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.id
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.acquisition_date
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.BreachData.uuid
+      description: ''
+      type: String
+    - contextPath: SpyCloud.BreachData.num_records
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.type
+      description: ''
+      type: String
+    - contextPath: SpyCloud.BreachData.title
+      description: ''
+      type: String
+    - contextPath: SpyCloud.BreachData.spycloud_publish_date
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.BreachData.description
+      description: ''
+      type: String
+    - contextPath: SpyCloud.BreachData.site_description
+      description: ''
+      type: String
+    - contextPath: SpyCloud.BreachData.assets.phone
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.gender
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.company_name
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.user_agent
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.country
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.social_telegram
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.social_skype
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.state
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.account_login_time
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.ip_addresses
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.postal_code
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.dob
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.account_signup_time
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.homepage
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.first_name
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.country_code
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.account_modification_time
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.full_name
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.address_1
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.last_name
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.email
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.city
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.password
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.BreachData.assets.username
+      description: ''
+      type: Number
+  - arguments:
+    - default: true
+      description: Domain or Subdomain name to search for.
+      isArray: false
+      name: domain
+      required: true
+      secret: false
+    - default: false
+      description: The maximum number of records to return from the collection. Limit
+        default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: false
+      description: This parameter lets you filter results by several types. The allowed
+        values are 'corporate' for corporate records, and 'infected' for infected
+        user records, email_domain to just match against email domains, and target_domain
+        to just match against target domains or subdomains. If no value has been provided
+        the API function will, by default, return all record types.
+      isArray: false
+      name: type
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field. Example:-  YYYY-MM-DD
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date range query on the spycloud_publish_date field.
+         Example:-  YYYY-MM-DD
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to filter based on the numeric severity code.
+        Possible values are:
+        2 -> Email only severity. This record is part of an email-only list.
+        5 -> Informational severity. This severity value is given to breach records where we have a non-crackable password hash, or no password at all.
+        20 ->High severity. This severity value is given to breach records where we have an email address and a plaintext password.
+        25 -> Critical severity. This severity value is given to breach records recovered from an infected machine (botnet data). These records will always have a plaintext password and most will have an email address.
+      isArray: false
+      name: severity
+      predefined:
+      - ''
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fetch all results.
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
+    deprecated: false
+    description: Get Breach Data by Domain Search
+    execution: false
+    name: spycloud-domain-data
+    outputs:
+    - contextPath: SpyCloud.Domain.username
+      type: String
+    - contextPath: SpyCloud.Domain.password
+      type: String
+    - contextPath: SpyCloud.Domain.password_plaintext
+      type: String
+    - contextPath: SpyCloud.Domain.password_type
+      type: String
+    - contextPath: SpyCloud.Domain.target_url
+      type: String
+    - contextPath: SpyCloud.Domain.user_browser
+      type: String
+    - contextPath: SpyCloud.Domain.ip_addresses
+      type: String
+    - contextPath: SpyCloud.Domain.infected_machine_id
+      type: String
+    - contextPath: SpyCloud.Domain.infected_path
+      type: String
+    - contextPath: SpyCloud.Domain.infected_time
+      type: Date
+    - contextPath: SpyCloud.Domain.user_sys_domain
+      type: String
+    - contextPath: SpyCloud.Domain.user_hostname
+      type: String
+    - contextPath: SpyCloud.Domain.user_os
+      type: String
+    - contextPath: SpyCloud.Domain.user_sys_registered_owner
+      type: String
+    - contextPath: SpyCloud.Domain.source_id
+      type: Number
+    - contextPath: SpyCloud.Domain.spycloud_publish_date
+      type: Date
+    - contextPath: SpyCloud.Domain.target_domain
+      type: String
+    - contextPath: SpyCloud.Domain.target_subdomain
+      type: String
+    - contextPath: SpyCloud.Domain.severity
+      type: Number
+    - contextPath: SpyCloud.Domain.document_id
+      type: String
+    - contextPath: SpyCloud.Domain.email
+      type: String
+    - contextPath: SpyCloud.Domain.email_domain
+      type: String
+    - contextPath: SpyCloud.Domain.email_username
+      type: String
+    - contextPath: SpyCloud.Domain.domain
+      type: String
+  - arguments:
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: since_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date range
+         query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: until_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to filter based on the numeric severity code.
+        Possible values are:
+        2 -> Email only severity. This record is part of an email-only list.
+        5 -> Informational severity. This severity value is given to breach records where we have a non-crackable password hash, or no password at all.
+        20 ->High severity. This severity value is given to breach records where we have an email address and a plaintext password.
+        25 -> Critical severity. This severity value is given to breach records recovered from an infected machine (botnet data). These records will always have a plaintext password and most will have an email address.
+      isArray: false
+      name: severity
+      predefined:
+      - ''
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - default: false
+      description: The maximum number of records to return from the collection. Limit
+        default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: true
+      description: Username you wish to search for.
+      isArray: false
+      name: username
+      required: true
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fetch all results.
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
+    deprecated: false
+    description: Get Breach Data by Username Search.
+    execution: false
+    name: spycloud-username-data
+    outputs:
+    - contextPath: SpyCloud.Username.username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.password
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.password_plaintext
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.password_type
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.target_url
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.user_browser
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.ip_addresses
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.infected_machine_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.infected_path
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.infected_time
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.Username.user_sys_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.user_hostname
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.user_os
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.user_sys_registered_owner
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.source_id
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.Username.spycloud_publish_date
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.Username.target_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.target_subdomain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.severity
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.Username.document_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.email
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.email_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.email_username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Username.domain
+      description: ''
+      type: String
+  - arguments:
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: since_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date range
+         query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: until_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to filter based on the numeric severity code.
+        Possible values are:
+        2 -> Email only severity. This record is part of an email-only list.
+        5 -> Informational severity. This severity value is given to breach records where we have a non-crackable password hash, or no password at all.
+        20 ->High severity. This severity value is given to breach records where we have an email address and a plaintext password.
+        25 -> Critical severity. This severity value is given to breach records recovered from an infected machine (botnet data). These records will always have a plaintext password and most will have an email address.
+      isArray: false
+      name: severity
+      predefined:
+      - ''
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - default: false
+      description: The maximum number of records to return from the collection. Limit
+        default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: true
+      description: IP address or network CIDR notation to search for. For CIDR notation,
+        use an underscore instead of a slash.
+      isArray: false
+      name: ip
+      required: true
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fecth all results.
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
+    deprecated: false
+    description: Get Breach Data by IP Address Search
+    execution: false
+    name: spycloud-ip-address-data
+    outputs:
+    - contextPath: SpyCloud.IPAddress.username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.password
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.password_plaintext
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.password_type
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.target_url
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.user_browser
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.ip_addresses
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.infected_machine_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.infected_path
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.infected_time
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.IPAddress.user_sys_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.user_hostname
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.user_os
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.user_sys_registered_owner
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.source_id
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.IPAddress.spycloud_publish_date
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.IPAddress.target_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.target_subdomain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.severity
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.IPAddress.document_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.email
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.email_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.email_username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.IPAddress.domain
+      description: ''
+      type: String
+  - arguments:
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: since_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date range
+         query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: until_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to filter based on the numeric severity code.
+        Possible values are:
+        2 -> Email only severity. This record is part of an email-only list.
+        5 -> Informational severity. This severity value is given to breach records where we have a non-crackable password hash, or no password at all.
+        20 ->High severity. This severity value is given to breach records where we have an email address and a plaintext password.
+        25 -> Critical severity. This severity value is given to breach records recovered from an infected machine (botnet data). These records will always have a plaintext password and most will have an email address.
+      isArray: false
+      name: severity
+      predefined:
+      - ''
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - default: false
+      description: The maximum number of records to return from the collection. Limit
+        default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: true
+      description: Email address to search for.
+      isArray: false
+      name: email
+      required: true
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fetch all results.
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
+    deprecated: false
+    description: Get Breach Data by Email Search.
+    execution: false
+    name: spycloud-email-data
+    outputs:
+    - contextPath: SpyCloud.EmailAddress.username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.password
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.password_plaintext
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.password_type
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.target_url
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.user_browser
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.ip_addresses
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.infected_machine_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.infected_path
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.infected_time
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.EmailAddress.user_sys_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.user_hostname
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.user_os
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.user_sys_registered_owner
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.source_id
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.EmailAddress.spycloud_publish_date
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.EmailAddress.target_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.target_subdomain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.severity
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.EmailAddress.document_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.email
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.email_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.email_username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.EmailAddress.domain
+      description: ''
+      type: String
+  - arguments:
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: since_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date range
+         query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: until_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to filter based on the numeric severity code.
+        Possible values are:
+        2 -> Email only severity. This record is part of an email-only list.
+        5 -> Informational severity. This severity value is given to breach records where we have a non-crackable password hash, or no password at all.
+        20 ->High severity. This severity value is given to breach records where we have an email address and a plaintext password.
+        25 -> Critical severity. This severity value is given to breach records recovered from an infected machine (botnet data). These records will always have a plaintext password and most will have an email address.
+      isArray: false
+      name: severity
+      predefined:
+      - ''
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - default: false
+      description: The maximum number of records to return from the collection. Limit
+        default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: true
+      description: Password you wish to search for.
+      isArray: false
+      name: password
+      required: true
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fetch all results.
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
+    deprecated: false
+    description: Get Breach Data by Password Search.
+    execution: false
+    name: spycloud-password-data
+    outputs:
+    - contextPath: SpyCloud.Password.username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.password
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.password_plaintext
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.password_type
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.target_url
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.user_browser
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.ip_addresses
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.infected_machine_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.infected_path
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.infected_time
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.Password.user_sys_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.user_hostname
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.user_os
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.user_sys_registered_owner
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.source_id
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.Password.spycloud_publish_date
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.Password.target_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.target_subdomain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.severity
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.Password.document_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.email
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.email_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.email_username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Password.domain
+      description: ''
+      type: String
+  - arguments:
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: since_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date range
+         query on the when an already published record was modified (record_modification_date).
+      isArray: false
+      name: until_modification_date
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to filter based on the numeric severity code.
+        Possible values are:
+        2 -> Email only severity. This record is part of an email-only list.
+        5 -> Informational severity. This severity value is given to breach records where we have a non-crackable password hash, or no password at all.
+        20 ->High severity. This severity value is given to breach records where we have an email address and a plaintext password.
+        25 -> Critical severity. This severity value is given to breach records recovered from an infected machine (botnet data). These records will always have a plaintext password and most will have an email address.
+      isArray: false
+      name: severity
+      predefined:
+      - ''
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - default: false
+      description: The maximum number of records to return from the collection. Limit
+        default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - auto: PREDEFINED
+      default: true
+      description: This parameter lets you filter results by type. The allowed values
+        are 'corporate' for corporate records, and 'infected' for infected user records
+        (from botnet data). If no value has been provided the API function will, by
+        default, return all record types.
+      isArray: false
+      name: type
+      predefined:
+      - corporate
+      - infected
+      required: false
+      secret: false
+    - auto: PREDEFINED
+      default: true
+      description: This parameters lets you filter results for only emails or only
+        domains on your watchlist. If no value has been provided, the API will return
+        all watchlist types.
+      isArray: false
+      name: watchlist_type
+      predefined:
+      - email
+      - domain
+      - subdomain
+      - ip
+      required: false
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fetch all results.
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
+    deprecated: false
+    description: Get Breach Data by Password Search.
+    execution: false
+    name: spycloud-watchlist-data
+    outputs:
+    - contextPath: SpyCloud.Watchlist.username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.password
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.password_plaintext
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.password_type
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.target_url
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.user_browser
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.ip_addresses
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.infected_machine_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.infected_path
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.infected_time
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.Watchlist.user_sys_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.user_hostname
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.user_os
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.user_sys_registered_owner
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.source_id
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.Watchlist.spycloud_publish_date
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.Watchlist.target_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.target_subdomain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.severity
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.Watchlist.document_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.email
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.email_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.email_username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.Watchlist.domain
+      description: ''
+      type: String
+  - arguments:
+    - default: false
+      description: One or more comma delimited Infected Machine ID to search for compass
+        breach records.
+      isArray: false
+      name: infected_machine_id
+      required: true
+      secret: false
+    - default: false
+      description: The maximum number of records to return from the collection. Limit
+        default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    deprecated: false
+    description: Get compass device data by infected_machine_id.
+    execution: false
+    name: spycloud-compass-device-data
+    outputs:
+    - contextPath: SpyCloud.CompassDeviceData.username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.password
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.password_plaintext
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.password_type
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.target_url
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.user_browser
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.ip_addresses
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.infected_machine_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.infected_path
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.infected_time
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.CompassDeviceData.user_sys_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.user_hostname
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.user_os
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.user_sys_registered_owner
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.source_id
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.CompassDeviceData.spycloud_publish_date
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.CompassDeviceData.target_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.target_subdomain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.severity
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.CompassDeviceData.document_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.email
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.email_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.email_username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceData.domain
+      description: ''
+      type: String
+  - arguments:
+    - default: false
+      description: |-
+        This parameter allows you to define the starting point for a date
+                range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        This parameter allows you to define the ending point for a date
+                range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the infected_time field.
+      isArray: false
+      name: since_infected
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the infected_time field.
+      isArray: false
+      name: until_infected
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        The maximum number of records to return from the collection. Limit
+                default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: false
+      description: This parameter will return records that are verified or unverified,
+        meaning those that matched the watchlist or not. By default if type is not
+        used, both types will be returned.
+      isArray: false
+      name: type
+      required: false
+      secret: false
+    - auto: PREDEFINED
+      default: false
+      description: Fetch all results
+      isArray: false
+      name: all_results
+      predefined:
+      - 'True'
+      - 'False'
+      required: false
+      secret: false
+    deprecated: false
+    description: Compass data list.
+    execution: false
+    name: spycloud-compass-data-list
+    outputs:
+    - contextPath: SpyCloud.CompassDataList.username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.password
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.password_plaintext
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.password_type
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.target_url
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.user_browser
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.ip_addresses
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.infected_machine_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.infected_path
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.infected_time
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.CompassDataList.user_sys_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.user_hostname
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.user_os
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.user_sys_registered_owner
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.source_id
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.CompassDataList.spycloud_publish_date
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.CompassDataList.target_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.target_subdomain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.severity
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.CompassDataList.document_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.email
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.email_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.email_username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDataList.domain
+      description: ''
+      type: String
+  - arguments:
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the infected_time.
+      isArray: false
+      name: since_infected
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the infected_time field.
+      isArray: false
+      name: until_infected
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        The maximum number of records to return from the collection. Limit
+                default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    deprecated: false
+    description: Compass device list data.
+    execution: false
+    name: spycloud-compass-device-list
+    outputs:
+    - contextPath: SpyCloud.CompassDeviceList.username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.password
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.password_plaintext
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.password_type
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.target_url
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.user_browser
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.ip_addresses
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.infected_machine_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.infected_path
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.infected_time
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.CompassDeviceList.user_sys_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.user_hostname
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.user_os
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.user_sys_registered_owner
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.source_id
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.CompassDeviceList.spycloud_publish_date
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.CompassDeviceList.target_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.target_subdomain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.severity
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.CompassDeviceList.document_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.email
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.email_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.email_username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassDeviceList.domain
+      description: ''
+      type: String
+  - arguments:
+    - default: false
+      description: One or more comma delimited Compass target application (subdomain
+        or domain) to search for.
+      isArray: false
+      name: target_application
+      required: true
+      secret: false
+    - default: false
+      description: This parameter allows you to define the starting point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: since
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to define the ending point for a date
+        range query on the spycloud_publish_date field.
+      isArray: false
+      name: until
+      required: false
+      secret: false
+    - default: false
+      description: This parameter allows you to filter based on a particular breach
+        source.
+      isArray: false
+      name: source_id
+      required: false
+      secret: false
+    - default: false
+      description: |-
+        The maximum number of records to return from the collection. Limit
+                default value is 50.
+      isArray: false
+      name: limit
+      required: false
+      secret: false
+    - default: false
+      description: The page number. Default is 1.
+      isArray: false
+      name: page
+      required: false
+      secret: false
+    - default: false
+      description: The number of requested results per page. Default is 50.
+      isArray: false
+      name: page_size
+      required: false
+      secret: false
+    deprecated: false
+    description: Get compass application data.
+    execution: false
+    name: spycloud-compass-application-data
+    outputs:
+    - contextPath: SpyCloud.CompassApplicationData.username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.password
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.password_plaintext
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.password_type
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.target_url
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.user_browser
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.ip_addresses
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.infected_machine_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.infected_path
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.infected_time
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.CompassApplicationData.user_sys_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.user_hostname
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.user_os
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.user_sys_registered_owner
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.source_id
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.CompassApplicationData.spycloud_publish_date
+      description: ''
+      type: Date
+    - contextPath: SpyCloud.CompassApplicationData.target_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.target_subdomain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.severity
+      description: ''
+      type: Number
+    - contextPath: SpyCloud.CompassApplicationData.document_id
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.email
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.email_domain
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.email_username
+      description: ''
+      type: String
+    - contextPath: SpyCloud.CompassApplicationData.domain
+      description: ''
+      type: String
+  dockerimage: demisto/python3:3.7.4.2245
+  feed: false
+  isfetch: false
+  longRunning: false
+  longRunningPort: false
+  runonce: false
+  script: '-'
+  subtype: python3
+  type: python
