@@ -1,0 +1,428 @@
+category: Vulnerability Management
+commonfields:
+  id: SpyCloudEnterpriseFeed
+  version: -1
+configuration:
+- defaultvalue: https://api.spycloud.io/enterprise-v2/
+  display: API URL
+  name: url
+  required: true
+  type: 0
+- display: API Key
+  hidden: false
+  name: apikey
+  required: false
+  type: 4
+- display: Fetch incidents
+  name: isFetch
+  required: false
+  type: 8
+- display: Incident type
+  name: incidentType
+  required: false
+  type: 13
+- additionalinfo: This parameter allows you to define the starting point for a date
+    range query on the spycloud_publish_date field.
+  defaultvalue: -1days
+  display: Since
+  hidden: false
+  name: since
+  required: false
+  type: 0
+- additionalinfo: This parameter allows you to define the ending point for a date
+    range query on the spycloud_publish_date field.
+  defaultvalue: now
+  display: Until
+  hidden: false
+  name: until
+  required: false
+  type: 0
+- additionalinfo: This parameter allows you to define the starting point for a date
+    range query on the when an already published record was modified (record_modification_date).
+  defaultvalue: -1days
+  display: Since Modification Date
+  hidden: false
+  name: since_modification_date
+  required: false
+  type: 0
+- additionalinfo: This parameter allows you to define the ending point for a date
+    range query on the when an already published record was modified (record_modification_date).
+  defaultvalue: now
+  display: Until Modification Date
+  hidden: false
+  name: until_modification_date
+  required: false
+  type: 0
+- additionalinfo: This parameter lets you filter results by type. The allowed values
+    are 'corporate' for corporate records, and 'infected' for infected user records
+    (from botnet data). If no value has been provided the API function will, by default,
+    return all record types.
+  display: Type
+  hidden: false
+  name: type
+  options:
+  - corporate
+  - infected
+  required: false
+  type: 15
+- additionalinfo: 'This parameters lets you filter results for only emails or only
+    domains on your watchlist. The allowed values are: [''email'', ''domain'', ''subdomain'',
+    ''ip'']. If no value has been provided, the API will return all watchlist types.'
+  display: Watchlist Type
+  hidden: false
+  name: watchlist_type
+  options:
+  - email
+  - domain
+  - subdomain
+  - ip
+  required: false
+  type: 15
+- additionalinfo: This parameter allows you to filter based on the numeric severity
+    code.
+  display: Severity
+  hidden: false
+  name: severity
+  options:
+  - '25'
+  - '20'
+  - '5'
+  - '2'
+  required: false
+  type: 16
+- additionalinfo: This parameter allows you to filter based on a particular breach
+    source.This parameter allows you to filter based on a particular breach source.
+  display: Source ID
+  hidden: false
+  name: source_id
+  required: false
+  type: 0
+- additionalinfo: If hashing is enabled for your API key, you have the option to provide
+    a 10 to 24 character, high entropy salt otherwise the pre-configured salt will
+    be used.
+  display: Salt
+  hidden: false
+  name: salt
+  required: false
+  type: 0
+- display: Trust any certificate (not secure)
+  name: insecure
+  required: false
+  type: 8
+- display: Use system proxy settings
+  hidden: false
+  name: proxy
+  required: false
+  type: 8
+description: Fetch spycloud watchlist data and create incident for Malaware and Breach
+  record.
+display: SpyCloud Enterprise Feed
+name: SpyCloudEnterpriseFeed
+script:
+  dockerimage: demisto/python3:3.7.4.2245
+  feed: false
+  isfetch: true
+  longRunning: false
+  longRunningPort: false
+  runonce: false
+  script: |-
+    import json
+
+    import time
+
+    from typing import Dict, List, Any, Tuple
+    from dateparser import parse
+    import requests
+    import urllib3
+
+    # Disable insecure warnings
+    urllib3.disable_warnings()  # pylint: disable=no-member
+
+    INTEGRATION_CONTEXT_NAME = "SpyCloud"
+    INVALID_CREDENTIALS_ERROR_MSG = (
+        "Authorization Error: The provided API Key "
+        "for SpyCloud is invalid. Please provide a "
+        "valid API Key."
+    )
+    MAX_RETRIES = 5
+    BACK_OFF_TIME = 0.1
+    DEFAULT_OFFSET = 0
+    PAGE_NUMBER_ERROR_MSG = (
+        "Invalid Input Error: page number should be greater " "than zero."
+    )
+    PAGE_SIZE_ERROR_MSG = "Invalid Input Error: page size should be greater than " "zero."
+    LIMIT_EXCEED = "LimitExceededException"
+    TOO_MANY_REQUESTS = "TooManyRequestsException"
+    INVALID_IP = "Invalid IP"
+    INVALID_API_KEY = "Invalid API key"
+    X_AMAZON_ERROR_TYPE = "x-amzn-ErrorType"
+    SPYCLOUD_ERROR = "SpyCloud-Error"
+    INVALID_IP_MSG = "Kindly contact SpyCloud support to whitelist your IP Address."
+    MONTHLY_QUOTA_EXCEED_MSG = (
+        "You have exceeded your monthly quota. Kindly " "contact SpyCloud support."
+    )
+    IDENTIFIER_ENDPOINT = "watchlist/identifiers"
+    WATCHLIST_ENDPOINT = "breach/data/watchlist"
+    DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'  # ISO8601 format with UTC, default in XSOAR
+
+
+    class Client(BaseClient):
+        """
+        This Client implements API calls, and does not contain any XSOAR logic.
+        Should only do requests and return data.
+        It inherits from BaseClient defined in CommonServer Python.
+        Most calls use _http_request() that handles proxy, SSL verification, etc.
+        For this implementation, no special attributes defined
+        """
+
+        def __init__(self, base_url: str, apikey: str, verify=None, proxy=None):
+            super().__init__(
+                base_url=base_url,
+                verify=verify,
+                proxy=proxy,
+                headers={"Content-type": "application/json", "X-API-Key": apikey},
+            )
+            self.apikey = apikey
+
+        def query_spy_cloud_api(
+            self, end_point: str, params: Dict[Any, Any] = None, is_retry: bool = False
+        ) -> Dict:
+            """
+            Args:
+             end_point (str): SpyCloud endpoint.
+             params (dict): Params.
+             is_retry (bool): Boolean Variable to check whether retry required.
+            Returns:
+             Return the raw API response from SpyCloud API.
+            """
+            if params is None:
+                params = {}
+            url_path = f"{self._base_url}{end_point}" if not is_retry else end_point
+            if not is_retry:
+                retries = None
+                status_list_to_retry = None
+                backoff_factor =  None
+            else:
+                retries = MAX_RETRIES
+                status_list_to_retry = {429}
+                backoff_factor = BACK_OFF_TIME
+
+            response = self._http_request(
+                method="GET",
+                full_url=url_path,
+                params=params,
+                headers=self._headers,
+                retries=retries,
+                status_list_to_retry=status_list_to_retry,
+                backoff_factor=backoff_factor,
+                error_handler=self.spy_cloud_error_handler,
+            )
+            return response
+
+        def spy_cloud_error_handler(self, response: requests.Response):
+            """
+            Error Handler for SpyCloud
+            Args:
+                response (response): SpyCloud response
+            Raise:
+                 DemistoException
+            """
+            response_headers = response.headers
+            err_msg = response.json().get('message') or response.json().get(
+                'errorMessage')
+            if response.status_code == 429:
+                if TOO_MANY_REQUESTS in response_headers.get(X_AMAZON_ERROR_TYPE, ''):
+                    self.query_spy_cloud_api(response.url, is_retry=True)
+                elif LIMIT_EXCEED in response_headers.get(X_AMAZON_ERROR_TYPE, ''):
+                    raise DemistoException(MONTHLY_QUOTA_EXCEED_MSG, res=response)
+            elif response.status_code == 403:
+                if INVALID_IP in response_headers.get(SPYCLOUD_ERROR, ''):
+                    raise DemistoException(
+                        f'{response_headers.get(SPYCLOUD_ERROR, "")}. '
+                        f'{INVALID_IP_MSG}', res=response)
+                elif INVALID_API_KEY in response_headers.get(SPYCLOUD_ERROR, ''):
+                    raise DemistoException(INVALID_CREDENTIALS_ERROR_MSG, res=response)
+            else:
+                raise DemistoException(err_msg)
+
+
+        @staticmethod
+        def set_last_run():
+            """
+            sets the last run
+            """
+            current_date = datetime.now()
+            demisto.setIntegrationContext({"last_modified_time": current_date.strftime("%Y-%m-%d")})
+            demisto.setLastRun({"last_run": current_date.strftime(DATE_TIME_FORMAT)})
+            demisto.info(f"set last_run: {current_date}")
+
+        @staticmethod
+        def get_last_run() -> str:
+            """Gets last run time in timestamp
+            Returns:
+                last run in timestamp, or '' if no last run
+            """
+            return demisto.getIntegrationContext().get("last_modified_time")
+
+    """ HELPER FUNCTIONS """
+
+
+    def test_module(client: Client) -> str:
+        """
+        Tests API connectivity and authentication
+        When 'ok' is returned it indicates the integration works like
+        it is supposed to and connection to the service is successful.
+        Args:
+            client(Client): Client class object
+        Returns:
+            Connection ok
+        """
+        client.query_spy_cloud_api("breach/data/watchlist", {})
+
+        return "ok"
+
+    def build_iterators(results: List) -> List:
+        """
+            Function to parse data and create relationship.
+            Args:
+                results: API response.
+            Returns:
+                Incident list
+        """
+        incident_record = []
+        for item in results:
+            if item.get('severity') == 25:
+                incident = {
+                    "type": f"SpyCloud Malware Data",
+                    "name": f"SpyCloud Malware Alert on {item['email']}"
+                    if item.get('email')
+                    else f"SpyCloud Malware Alert on {item['ip_addresses'][0]}",
+                    "rawJSON": json.dumps(item),
+                    "severity": 4,
+                }
+                incident_record.append(incident)
+            if item.get('severity') == 20:
+                incident = {
+                    "type": "SpyCloud Breach Data",
+                    "name": f"SpyCloud Breach Alert on {item['email']}"
+                    if item.get('email')
+                    else f"SpyCloud Malware Alert on {item['ip_addresses'][0]}",
+                    "rawJSON": json.dumps(item),
+                    "severity": 3,
+                }
+                incident_record.append(incident)
+        return incident_record
+
+
+    def create_spycloud_args(client: Client, args: Dict) -> Dict:
+        """
+        This function creates a dictionary of the arguments sent to the SpyCloud
+        API based on the demisto.args().
+        Args:
+            client(Client): Client class object
+            args: demisto.args()
+        Returns:
+            Return arguments dict.
+        """
+
+        spycloud_args: Dict = {}
+        last_run = client.get_last_run()
+        since: Any
+        until: Any = ""
+        since_modification_date: Any = ""
+        until_modification_date: Any = ""
+        if last_run:
+            since = last_run
+        else:
+            since = parse(args.get("since", ""), settings={"TIMEZONE": "UTC"})
+            until = parse(args.get("until", ""), settings={"TIMEZONE": "UTC"})
+            since_modification_date = parse(
+                args.get("since_modification_date", ""), settings={"TIMEZONE": "UTC"}
+            )
+            until_modification_date = parse(
+                args.get("until_modification_date", ""), settings={"TIMEZONE": "UTC"}
+            )
+            if until:
+                until = until.strftime("%Y-%m-%d")
+            if since:
+                since = since.strftime("%Y-%m-%d")
+            if since_modification_date:
+                since_modification_date = since_modification_date.strftime(
+                    "%Y-%m-%d")
+            if until_modification_date:
+                until_modification_date = until_modification_date.strftime(
+                    "%Y-%m-%d")
+        severity_list = argToList(args.get("severity", []))
+        for severity in severity_list:
+            if severity not in ["2", "5", "25", "20"]:
+                raise DemistoException(
+                    "Invalid input Error: supported values for "
+                    "severity are: 2, 5, 20, 25"
+                )
+        spycloud_args["since"] = since
+        spycloud_args["until"] = until
+        spycloud_args["type"] = args.get("type", "")
+        spycloud_args["severity"] = args.get("severity")
+        spycloud_args["source_id"] = args.get("source_id", "")
+        spycloud_args["query"] = args.get("query", "")
+        spycloud_args["type"] = args.get("type", "")
+        spycloud_args["watchlist_type"] = args.get("watchlist_type", "")
+        spycloud_args["since_modification_date"] = since_modification_date
+        spycloud_args["until_modification_date"] = until_modification_date
+        spycloud_args['salt'] = args.get('salt')
+        return spycloud_args
+
+
+    def fetch_incident_command(client: Client, args: Dict):
+        """
+        Function to create Incident and Indicator to XSOAR platform.
+        Args:
+            client(Client): Client class object
+            args: demisto.args()
+        """
+        cursor = ""
+        wait_duration = 1.1
+        param = create_spycloud_args(client, args)
+        while True:
+            response = client.query_spy_cloud_api(
+                WATCHLIST_ENDPOINT, {"cursor": cursor, **param}
+            )
+            results = response.get("results", [])
+            incident_record = build_iterators(results)
+            demisto.incidents(incident_record)
+            cursor = response.get("cursor", "")
+            if not cursor or cursor == "":
+                client.set_last_run()
+                break
+            time.sleep(wait_duration)
+
+
+    def main():
+        """
+        PARSE AND VALIDATE INTEGRATION PARAMS
+        """
+        params = demisto.params()
+        apikey = params.get("apikey")
+        verify_certificate = not params.get("insecure", False)
+        proxy = params.get("proxy", False)
+        handle_proxy()
+        command = demisto.command()
+        try:
+            base_url = params.get("url")
+            client = Client(base_url, apikey, verify=verify_certificate, proxy=proxy)
+            demisto.info(f"Command being called is {command}")
+            if command == "test-module":
+                return_results(test_module(client))
+            elif command == "fetch-incidents":
+                fetch_incident_command(client, params)
+            else:
+                raise NotImplementedError(f"command {command} is not supported")
+        except Exception as e:
+            return_error(f"Failed to execute {command} command. Error: {str(e)}")
+
+
+    if __name__ in ("__main__", "__builtin__", "builtins"):
+        main()
+  subtype: python3
+  type: python
+image: data:image/png;base64,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
